@@ -1,0 +1,15 @@
+# BIN
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# DEP
+vendor/
+
+# IDE
+.idea/
+.vscode/
+.vim/

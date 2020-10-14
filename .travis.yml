@@ -1,0 +1,14 @@
+language: go
+go:
+  - "1.15"
+
+env:
+  - GO111MODULE=on
+
+install: true
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - make shum
