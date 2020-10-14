@@ -14,3 +14,7 @@ fmt:
 .PHONY: shum
 shum:
 	go build -o $(BIN_PATH) $(MAIN_PATH)
+
+.PHONY: dep
+dep:
+	go mod tidy && go mod vendor && go mod verify

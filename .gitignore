@@ -6,9 +6,6 @@
 *.dylib
 bin/
 
-# DEP
-vendor/
-
 # IDE
 .idea/
 .vscode/
