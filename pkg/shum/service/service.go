@@ -2,14 +2,12 @@ package service
 
 import (
 	"fmt"
-	"os"
+	"strings"
+
+	"github.com/maildealru/shum/pkg/shum/consts"
+	"github.com/maildealru/shum/pkg/shum/errs"
 
 	"github.com/takama/daemon"
-)
-
-const (
-	srvName  = "shum"
-	srvDescr = "service that allows running shell command via HTTP API"
 )
 
 type Service struct {
@@ -17,7 +15,9 @@ type Service struct {
 }
 
 func NewService() *Service {
-	d, err := daemon.New(srvName, srvDescr, daemon.SystemDaemon)
+	d, err := daemon.New(
+		consts.Name, consts.Description, daemon.SystemDaemon,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -26,26 +26,36 @@ func NewService() *Service {
 	}
 }
 
-func (srv *Service) Manage() (string, error) {
-	if len(os.Args) > 1 {
-		command := os.Args[1]
-		switch command {
-		case "install":
-			return srv.Install()
-		case "remove":
-			return srv.Remove()
-		case "start":
-			return srv.Start()
-		case "stop":
-			return srv.Stop()
-		case "status":
-			return srv.Status()
+func (srv *Service) Manage(args []string) (bool, string, error) {
+	if len(args) > 1 {
+		if len(args) == 2 {
+			command := args[1]
+			switch command {
+			case "install":
+				s, err := srv.Install()
+				return true, s, err
+			case "remove":
+				s, err := srv.Remove()
+				return true, s, err
+			case "start":
+				s, err := srv.Start()
+				return true, s, err
+			case "stop":
+				s, err := srv.Stop()
+				return true, s, err
+			case "status":
+				s, err := srv.Status()
+				return true, s, err
+			}
+			//NOTE: only management commands will have args[1]
+			//      that does not have flag/option prefix
+			if !strings.HasPrefix(command, "-") {
+				usage := fmt.Sprintf(
+					"Usage: %s install | remove | start | stop | status [OPTIONS]", consts.Name,
+				)
+				return true, usage, errs.Errorf("unknown command %q", command)
+			}
 		}
 	}
-
-	usage := fmt.Sprintf(
-		"Usage: %s install | remove | start | stop | status", srvName,
-	)
-
-	return usage, nil
+	return false, "", nil
 }

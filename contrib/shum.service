@@ -1,0 +1,11 @@
+[Unit]
+Description=service that allows running shell command via HTTP API
+
+[Service]
+PIDFile=/var/run/shum.pid
+ExecStartPre=/bin/rm -f /var/run/shum.pid
+ExecStart=/usr/bin/shum --config-file=/etc/shum.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
