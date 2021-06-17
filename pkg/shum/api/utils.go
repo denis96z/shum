@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 
@@ -25,6 +26,10 @@ func WriteErrWithBody(ctx *gin.Context, err error) {
 	ctx.JSON(http.StatusInternalServerError, makeErrBody(err))
 }
 
+func WriteErrWithAndOutputBody(ctx *gin.Context, err error, stdout, stderr bytes.Buffer) {
+	ctx.JSON(http.StatusInternalServerError, makeErrWithOutputBody(err, stdout, stderr))
+}
+
 type okBody struct{}
 
 func (v okBody) MarshalJSON() ([]byte, error) {
@@ -42,6 +47,26 @@ func makeErrBody(err error) errBody {
 func (v errBody) MarshalJSON() ([]byte, error) {
 	b := []byte(fmt.Sprintf(
 		`{"status":"error","message":%q}`, v.err.Error(),
+	))
+	return b, nil
+}
+
+type errWithOutputBody struct {
+	err    error
+	stdout bytes.Buffer
+	stderr bytes.Buffer
+}
+
+func makeErrWithOutputBody(err error, stdout, stderr bytes.Buffer) errWithOutputBody {
+	return errWithOutputBody{
+		err: err, stdout: stdout, stderr: stderr,
+	}
+}
+
+func (v errWithOutputBody) MarshalJSON() ([]byte, error) {
+	b := []byte(fmt.Sprintf(
+		`{"status":"error","message":%q,"stdout":%q,"stderr":%q}`,
+		v.err.Error(), v.stdout.String(), v.stderr.String(),
 	))
 	return b, nil
 }

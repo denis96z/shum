@@ -39,7 +39,11 @@ func (srv *API) HandleCmd(ctx *gin.Context) {
 	cmd.Stderr = &bErr
 
 	if err := cmd.Run(); err != nil {
-		WriteErrWithBody(ctx, err)
+		if command.RevealOutput {
+			WriteErrWithAndOutputBody(ctx, err, bOut, bErr)
+		} else {
+			WriteErrWithBody(ctx, err)
+		}
 		return
 	}
 
